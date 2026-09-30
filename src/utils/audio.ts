@@ -140,6 +140,72 @@ class SoundEffects {
       osc.stop(now + 0.04);
     } catch {}
   }
+
+  // Copilot Verdict Sounds (RotaPro Style)
+  playVerdictChime(verdict: 'verde' | 'amarelo' | 'vermelho') {
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      if (verdict === 'verde') {
+        // High upbeat dual ding (Accept!)
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc1.frequency.setValueAtTime(659.25, now); // E5
+        osc2.frequency.setValueAtTime(1046.50, now + 0.1); // C6
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.15);
+        osc2.start(now + 0.1);
+        osc2.stop(now + 0.35);
+      } else if (verdict === 'amarelo') {
+        // Caution middle beep
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(493.88, now + 0.1);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else {
+        // Red warning buzz (Decline!)
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.setValueAtTime(164.81, now + 0.12);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.32);
+      }
+    } catch {}
+  }
+
+  // Voice announcement (Text-To-Speech for driver on the road)
+  speak(text: string) {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel(); // Stop any pending speech
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 1.05; // slightly faster for quick driving decisions
+      utterance.pitch = 1.0;
+      window.speechSynthesis.speak(utterance);
+    } catch {}
+  }
 }
 
 export const sounds = new SoundEffects();
+

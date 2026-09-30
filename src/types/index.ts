@@ -74,5 +74,38 @@ export interface AppSettings {
   soundEnabled: boolean;
   hapticEnabled: boolean;
   floatingBubbleEnabled: boolean;
+  copilotBalloonEnabled: boolean;
   theme: 'dark' | 'light';
+}
+
+export type VerdictColor = 'verde' | 'amarelo' | 'vermelho';
+
+export interface CopilotSettings {
+  minRatePerKm: number; // e.g. 2.00
+  minRatePerHour: number; // e.g. 42.00
+  maxPickupKm: number; // e.g. 3.0
+  voiceAlerts: boolean;
+  autoOpenBalloonOnOffer: boolean;
+  sensitivity: 'conservador' | 'equilibrado' | 'arrojado';
+}
+
+export interface EvaluatedOffer {
+  id: string;
+  timestamp: number;
+  timeStr: string;
+  grossValue: number;
+  tripKm: number;
+  pickupKm: number;
+  totalKm: number;
+  durationMinutes: number;
+  costFuel: number;
+  netProfit: number;
+  profitMarginPct: number;
+  ratePerKm: number;
+  ratePerHour: number;
+  verdict: VerdictColor;
+  verdictTitle: string;
+  verdictReason: string;
+  category: RideCategory;
+  actionTaken: 'aceitou' | 'recusou' | 'analisando';
 }
