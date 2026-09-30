@@ -12,7 +12,13 @@ import {
   Zap, 
   Fuel, 
   ArrowUpRight,
-  Filter
+  Filter,
+  Radio,
+  Play,
+  Pause,
+  ExternalLink,
+  Smartphone,
+  Info
 } from 'lucide-react';
 import { CopilotSettings, EvaluatedOffer, VehicleConfig, RideCategory } from '../types';
 import { formatCurrency, formatKm } from '../utils/formatters';
@@ -63,14 +69,14 @@ export const CopilotDashboardSection: React.FC<CopilotDashboardSectionProps> = (
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-extrabold text-base text-white tracking-tight uppercase">
-                COPILOTO ROTAPRO
+                COPILOTO AUTOMÁTICO ROTAPRO
               </h3>
               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                Semáforo Ativo
+                Sobreposição Ativa
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Avaliação financeira instantânea antes de você aceitar a corrida na 99
+              Quando tocar a corrida, o balão aparece sozinho sobre o app da 99 com o resultado
             </p>
           </div>
         </div>
@@ -89,6 +95,57 @@ export const CopilotDashboardSection: React.FC<CopilotDashboardSectionProps> = (
         </button>
       </div>
 
+      {/* Automatic Radar Dispatch Card */}
+      <div className="p-4 rounded-2xl bg-black/50 border border-amber-400/40 mb-4 relative z-10 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Radio size={18} className={settings.autoRadarEnabled ? 'text-emerald-400 animate-pulse' : 'text-slate-500'} />
+            <div>
+              <span className="text-xs font-black text-white uppercase tracking-tight block">
+                Radar Automático de Corridas 99
+              </span>
+              <span className="text-[11px] text-slate-400">
+                {settings.autoRadarEnabled
+                  ? `Ativo · Disparando e avaliando chamadas a cada ${settings.autoRadarIntervalSec || 20}s`
+                  : 'Desligado · Ative para receber chamadas automaticamente com o balão'}
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => onUpdateSettings({ ...settings, autoRadarEnabled: !settings.autoRadarEnabled })}
+            className={`px-3.5 py-1.5 rounded-xl font-black text-xs transition-all shadow-md ${
+              settings.autoRadarEnabled
+                ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                : 'bg-[#FFBF00] hover:bg-[#FFC91A] text-black'
+            }`}
+          >
+            {settings.autoRadarEnabled ? 'LIGADO' : 'ATIVAR'}
+          </button>
+        </div>
+
+        {settings.autoRadarEnabled && (
+          <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+            <span className="text-slate-400 text-[11px]">Intervalo das chamadas:</span>
+            <div className="flex items-center gap-1.5">
+              {[15, 25, 45].map((sec) => (
+                <button
+                  key={sec}
+                  onClick={() => onUpdateSettings({ ...settings, autoRadarIntervalSec: sec })}
+                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-colors ${
+                    (settings.autoRadarIntervalSec || 20) === sec
+                      ? 'bg-amber-400 text-black border-amber-400'
+                      : 'bg-white/5 border-white/10 text-slate-300'
+                  }`}
+                >
+                  {sec}s
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Balão Toggle & Voice Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4 relative z-10">
         <button
@@ -100,7 +157,7 @@ export const CopilotDashboardSection: React.FC<CopilotDashboardSectionProps> = (
           }`}
         >
           <Bot size={16} />
-          <span>{isBalloonEnabled ? '🟢 BALÃO DO COPILOTO ATIVO' : '▶ ATIVAR BALÃO DO COPILOTO'}</span>
+          <span>{isBalloonEnabled ? '🟢 BALÃO FLUTUANTE ATIVO NA TELA' : '▶ ATIVAR BALÃO FLUTUANTE'}</span>
         </button>
 
         <button
@@ -116,7 +173,7 @@ export const CopilotDashboardSection: React.FC<CopilotDashboardSectionProps> = (
         </button>
       </div>
 
-      {/* Copilot Performance Stats (Drivers love this!) */}
+      {/* Copilot Performance Stats */}
       <div className="grid grid-cols-3 gap-2 p-3.5 rounded-2xl bg-black/40 border border-white/5 mb-4 relative z-10">
         <div className="text-center">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
@@ -153,6 +210,20 @@ export const CopilotDashboardSection: React.FC<CopilotDashboardSectionProps> = (
             em combustível
           </span>
         </div>
+      </div>
+
+      {/* HOW TO OVERLAY OFFICIAL 99 APP EXPLANATION (Driver Guide) */}
+      <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 mb-4 relative z-10 space-y-2">
+        <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300">
+          <Info size={14} />
+          <span>Como funciona a sobreposição no aplicativo oficial da 99:</span>
+        </div>
+        <p className="text-[11px] text-slate-300 leading-relaxed">
+          1. Ative a <strong>Janela Flutuante (PiP)</strong> ou mantenha o balão ativo na tela do navegador.<br />
+          2. Abra o app de motorista da 99 normalmente no celular.<br />
+          3. O balão fica visível flutuando por cima do mapa da 99.<br />
+          4. Quando tocar a corrida, o alarme toca, a contagem de <strong>15 segundos</strong> começa e o veredito aparece em destaque!
+        </p>
       </div>
 
       {/* Inline Settings Drawer */}
@@ -232,7 +303,7 @@ export const CopilotDashboardSection: React.FC<CopilotDashboardSectionProps> = (
       {/* Simulator Quick Action Buttons */}
       <div className="space-y-1.5 relative z-10">
         <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-          Testar Avaliações com 1 Clique:
+          Disparar Chamada Manual de Teste:
         </span>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <button

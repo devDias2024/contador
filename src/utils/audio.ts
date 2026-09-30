@@ -17,6 +17,31 @@ class SoundEffects {
     return this.ctx;
   }
 
+  // 99 Incoming Ride Ringtone Alert (Urgent dual-tone chime)
+  playIncoming99Alert() {
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      // Two-pulse alert (like 99 / Uber dispatch beep)
+      for (let i = 0; i < 2; i++) {
+        const offset = i * 0.18;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now + offset);
+        osc.frequency.setValueAtTime(1174.66, now + offset + 0.08); // A5 -> D6
+        gain.gain.setValueAtTime(0.25, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.16);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.16);
+      }
+    } catch {}
+  }
+
   // Cash register / coin drop sound when a ride is registered
   playCashChime() {
     try {

@@ -61,6 +61,11 @@ const DEFAULT_COPILOT_SETTINGS: CopilotSettings = {
   voiceAlerts: true,
   autoOpenBalloonOnOffer: true,
   sensitivity: 'equilibrado',
+  autoRadarEnabled: true, // Default to true so driver experiences automatic copilot right away!
+  autoRadarIntervalSec: 20,
+  autoSoundDetection: false,
+  autoAcceptGreen: false,
+  offerTimeoutSeconds: 15,
 };
 
 export default function App() {
@@ -217,6 +222,62 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
   }, [settings]);
+
+  // Automatic Radar Loop for incoming 99 ride offers
+  useEffect(() => {
+    if (!copilotSettings.autoRadarEnabled) return;
+
+    const intervalSec = copilotSettings.autoRadarIntervalSec || 20;
+    const interval = setInterval(() => {
+      // If there's already an active offer waiting for driver response, don't override
+      setActiveOffer((current) => {
+        if (current) return current;
+
+        // Generate realistic 99 ride proposal
+        const templates = [
+          { gross: 24.90, trip: 5.6, pickup: 1.0, cat: '99pop' as const },
+          { gross: 35.80, trip: 8.4, pickup: 0.8, cat: '99plus' as const },
+          { gross: 14.20, trip: 6.8, pickup: 1.9, cat: '99pop' as const },
+          { gross: 9.80, trip: 7.9, pickup: 3.4, cat: '99pop' as const }, // bad call
+          { gross: 43.50, trip: 12.0, pickup: 1.2, cat: '99plus' as const },
+          { gross: 17.50, trip: 4.2, pickup: 0.6, cat: '99moto' as const },
+        ];
+        const selected = templates[Math.floor(Math.random() * templates.length)];
+        
+        const jitterGross = Number((selected.gross + (Math.random() * 2 - 1)).toFixed(2));
+        const jitterTrip = Number((selected.trip + (Math.random() * 0.8 - 0.4)).toFixed(1));
+
+        const evaluation = evaluateRideOffer({
+          grossValue: jitterGross,
+          tripKm: jitterTrip,
+          pickupKm: selected.pickup,
+          category: selected.cat,
+          config: vehicleConfig,
+          settings: copilotSettings,
+        });
+
+        // Trigger voice announcement
+        if (copilotSettings.voiceAlerts) {
+          const text = evaluation.verdict === 'verde'
+            ? `Nova chamada 99! R$ ${evaluation.grossValue.toFixed(2)}. Aceitar! Lucro de R$ ${evaluation.netProfit.toFixed(2)}.`
+            : evaluation.verdict === 'amarelo'
+            ? `Chamada 99 de valor médio. R$ ${evaluation.ratePerKm.toFixed(2)} por km.`
+            : `Recuse! Chamada com prejuízo de combustível.`;
+          sounds.speak(text);
+        }
+
+        return evaluation;
+      });
+    }, intervalSec * 1000);
+
+    return () => clearInterval(interval);
+  }, [
+    copilotSettings.autoRadarEnabled, 
+    copilotSettings.autoRadarIntervalSec, 
+    copilotSettings.voiceAlerts, 
+    vehicleConfig, 
+    copilotSettings
+  ]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.COPILOT_SETTINGS, JSON.stringify(copilotSettings));

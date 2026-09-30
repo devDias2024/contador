@@ -87,6 +87,11 @@ export interface CopilotSettings {
   voiceAlerts: boolean;
   autoOpenBalloonOnOffer: boolean;
   sensitivity: 'conservador' | 'equilibrado' | 'arrojado';
+  autoRadarEnabled: boolean; // Automatic simulation/dispatch radar
+  autoRadarIntervalSec: number; // Interval for auto incoming rides (e.g. 20s)
+  autoSoundDetection: boolean; // Listen to 99 notification ring/pitch via microphone
+  autoAcceptGreen: boolean; // Auto-accept high profit rides without touching
+  offerTimeoutSeconds: number; // 99 expiration countdown (default 15s)
 }
 
 export interface EvaluatedOffer {
