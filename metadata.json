@@ -1,0 +1,6 @@
+{
+  "name": "99 Contador Pro - Gestão de Corridas",
+  "description": "App moderno para motoristas da 99: contador de corridas, bolha flutuante, cálculo de lucro líquido real, controle de KM e combustível, meta diária e análise de turno.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
